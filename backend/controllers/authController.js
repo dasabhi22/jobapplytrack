@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 import pool from "../db.js";
 
 
@@ -20,6 +21,38 @@ export const registerUser = async (req, res) => {
         res.status(201).json({message: "User created successfully", user: newUser.rows[0]});
     } catch (error) {
         console.error("Error creating user:", error);
+        res.status(500).json({message: "Internal server error"});
+    }
+}
+export const loginUser = async (req, res) => {
+    const {email, password} = req.body;
+
+    if(!email || !password){
+        return res.status(400).json({message: "Invalid credentials"});
+    }
+
+    try{
+        const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+        const user = result.rows[0];
+
+        if(!user){
+            return res.status(400).json({message: "Invalid Credentials"});
+        }
+
+        const isMatch = await(bcrypt.compare(password,user.password));
+        if(!isMatch){
+            return res.status(400).json({message: "Invalid Credentials"});
+        }
+
+        const token = jwt.sign(
+            {id: user.id, name: user.name, email: user.email},
+            process.env.JWT_SECRET,
+            {expiresIn: "7d"}
+        );
+        res.json({message: "Login Successfull", token});
+
+    }catch(error){
+        console.error(error);
         res.status(500).json({message: "Internal server error"});
     }
 }
