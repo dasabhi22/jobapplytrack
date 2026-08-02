@@ -4,6 +4,7 @@ import cors from "cors";
 import pool from "./db.js";
 
 import authRoutes from "./routes/authRoutes.js";
+import profileRoutes from "./routes/profileRoutes.js";
 
 
 dotenv.config();
@@ -17,6 +18,7 @@ app.use("/api/auth", authRoutes);
 app.get("/", (req, res) => {
     res.send("Backend Running");
 });
+app.use("/api/profile", profileRoutes);
 
 
 const PORT = process.env.PORT;
