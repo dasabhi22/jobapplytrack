@@ -3,6 +3,8 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
+import EditApplication from "./pages/EditApplication";
+import AddApplication from "./pages/AddApplication";
 
 function App() {
   return (
@@ -22,9 +24,24 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/add"
+          element = {
+            <ProtectedRoute>
+              <AddApplication />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/edit/:id"
+          element = {
+            <ProtectedRoute>
+              <EditApplication />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
-  )
+  );
 }
+
 
 export default App
