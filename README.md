@@ -2,9 +2,15 @@
 
 ApplyTrack is a full-stack web application that helps users manage and track their job applications in one place.
 
-Users can create an account, securely log in, and manage their job applications by adding, editing, deleting, and tracking application statuses.
+Users can create an account, securely log in, and manage job applications by adding, editing, deleting, and tracking application statuses.
 
-The application uses **JWT-based authentication**, **PostgreSQL**, and a **React + Node.js** architecture. The complete application can also be run locally using **Docker Compose**.
+The application is built with **React, Node.js, Express.js, PostgreSQL, JWT authentication, and Docker**. It features a responsive interface with a centralized application dashboard and is deployed using **Vercel, Render, and Render PostgreSQL**.
+
+## Live Application
+
+**Frontend:** https://jobapplytrack.vercel.app/login
+
+**Backend API:** https://jobapplytrack-backend.onrender.com
 
 ---
 
@@ -34,12 +40,19 @@ Supported application statuses:
 * `Rejected`
 * `Offer`
 
+
 ### Dashboard
 
-* View all job applications in a table
-* Track application status
-* Color-coded status badges
-* Manage applications from a centralized dashboard
+* View and manage all job applications from a centralized dashboard
+
+* Track application progress across Applied, Interview, Rejected, and Offer stages
+
+* Color-coded status indicators for quick application tracking
+
+* Add, edit, and delete applications directly from the dashboard
+
+* Responsive ledger-style interface for desktop and mobile devices
+
 
 ---
 
@@ -135,7 +148,7 @@ JOBAPPLYTRACK/
 │   │   │
 │   │   ├── components/
 │   │   │   ├── ProtectedRoute.jsx
-│   │   │   └── StatusBadge.jsx
+│   │   │   └── StatusTag.jsx
 │   │   │
 │   │   ├── pages/
 │   │   │   ├── Login.jsx
@@ -563,42 +576,58 @@ Authorization: Bearer <JWT_TOKEN>
 
 # Deployment
 
-The application is designed to be deployable using separate services for the frontend, backend, and database.
+ApplyTrack is deployed using separate services for the frontend, backend, and database.
 
-A planned deployment architecture is:
+## Production Architecture
 
 ```text
-                    Internet
-                       │
-                       ▼
-              ┌─────────────────┐
-              │     Frontend    │
-              │     Vercel      │
-              └────────┬────────┘
-                       │
-                       │ HTTPS API
-                       ▼
-              ┌─────────────────┐
-              │     Backend     │
-              │     Render      │
-              │     Docker      │
-              └────────┬────────┘
-                       │
-                       ▼
-              ┌─────────────────┐
-              │   PostgreSQL    │
-              │  Managed DB     │
-              └─────────────────┘
+                         Internet
+                            │
+                            ▼
+                   ┌──────────────────┐
+                   │     Frontend     │
+                   │ React + Vite     │
+                   │      Vercel      │
+                   └────────┬─────────┘
+                            │
+                            │ HTTPS / REST API
+                            ▼
+                   ┌──────────────────┐
+                   │     Backend      │
+                   │ Node.js + Express│
+                   │ Docker + Render  │
+                   └────────┬─────────┘
+                            │
+                            │ PostgreSQL Connection
+                            ▼
+                   ┌──────────────────┐
+                   │    PostgreSQL    │
+                   │ Managed Database │
+                   │      Render      │
+                   └──────────────────┘
 ```
 
-For production deployment:
+### Live URLs
 
-* Use a managed PostgreSQL database.
-* Deploy the backend as a Docker-based web service.
-* Deploy the frontend as a production Vite build.
-* Configure production environment variables through the hosting providers.
-* Configure CORS to allow requests from the deployed frontend.
-* Never expose database passwords or JWT secrets in the repository.
+**Frontend:** https://jobapplytrack.vercel.app/login
+
+**Backend API:** https://jobapplytrack-backend.onrender.com
+
+### Deployment Setup
+
+* The React frontend is deployed on **Vercel**.
+
+* The Node.js and Express backend is containerized with **Docker** and deployed as a web service on **Render**.
+
+* PostgreSQL is hosted using a managed **Render PostgreSQL** database.
+
+* Production environment variables are configured through the respective hosting platforms.
+
+* The frontend communicates with the deployed backend through the `VITE_API_URL` environment variable.
+
+* CORS is configured to allow requests from the deployed frontend.
+
+* Database credentials and JWT secrets are stored as environment variables and are not committed to the repository.
 
 ---
 
