@@ -1,102 +1,125 @@
-import { useEffect , useState } from "react";
-import {useNavigate, Link} from "react-router-dom";
-import StatusBadge from "../components/StatusBadge";
+import { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import StatusTag from "../components/StatusTag";
 import api from "../api/axios";
 
+const statusBorder = {
+  Applied: "border-dusk",
+  Interview: "border-gold",
+  Rejected: "border-clay",
+  Offer: "border-forest",
+};
+
 const Dashboard = () => {
-    const [applications, setApplications] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState("");
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
-
-    const fetchApplications = async () =>{
-        try{
-            const response = await api.get("/applications");
-            setApplications(response.data);
-        }catch(err){
-            setError(err.response?.data?.message || "Failed to fetch applications!");
-        }finally{
-            setLoading(false)
-        }
-    };
-    useEffect(()=>{
-        fetchApplications();
-    }, []);
-
-    const handleDelete = async (id) => {
-        if(!confirm("Are you sure you want to delete this application?")) return;
-        try{
-            await api.delete(`/applications/${id}`);
-            setApplications(applications.filter((app) => app.id !== id));
-        }catch(err){
-            setError(err.response?.data?.message || "Failed to delete application!");
-        }
-    };
-
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        navigate("/login");
+  const fetchApplications = async () => {
+    try {
+      const response = await api.get("/applications");
+      setApplications(response.data);
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to fetch applications");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    return (
-        <div className="min-h-screen bg-slate-900 px-6 py-8">
-        <div className="max-w-5xl mx-auto">
-            <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-white">My Applications</h1>
-            <div className="flex gap-3">
-                <Link to="/add" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium transition">
-                + Add Application
-                </Link>
-                <button onClick={handleLogout} className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded font-medium transition">
-                Logout
-                </button>
-            </div>
-            </div>
+  useEffect(() => { fetchApplications(); }, []);
 
-            {loading && <p className="text-slate-400">Loading...</p>}
-            {error && <p className="text-red-400">{error}</p>}
+  const handleDelete = async (id) => {
+    if (!confirm("Delete this application?")) return;
+    try {
+      await api.delete(`/applications/${id}`);
+      setApplications(applications.filter((app) => app.id !== id));
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to delete application");
+    }
+  };
 
-            {!loading && applications.length === 0 && (
-            <p className="text-slate-400">No applications yet. Add your first one.</p>
-            )}
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
 
-            {!loading && applications.length > 0 && (
-            <div className="bg-slate-800 rounded-xl overflow-hidden">
-                <table className="w-full text-left">
-                <thead>
-                    <tr className="bg-slate-700 text-slate-300 text-sm">
-                    <th className="px-4 py-3">Company</th>
-                    <th className="px-4 py-3">Role</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3">Applied Date</th>
-                    <th className="px-4 py-3">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {applications.map((app) => (
-                    <tr key={app.id} className="border-t border-slate-700 text-slate-200">
-                        <td className="px-4 py-3">{app.company}</td>
-                        <td className="px-4 py-3">{app.role}</td>
-                        <td className="px-4 py-3"><StatusBadge status={app.status} /></td>
-                        <td className="px-4 py-3">
-                        {app.applied_date ? new Date(app.applied_date).toLocaleDateString() : '-'}
-                        </td>
-                        <td className="px-4 py-3">
-                        <div className="flex gap-3">
-                            <button onClick={() => navigate(`/edit/${app.id}`)} className="text-blue-400 hover:underline text-sm">Edit</button>
-                            <button onClick={() => handleDelete(app.id)} className="text-red-400 hover:underline text-sm">Delete</button>
-                        </div>
-                        </td>
-                    </tr>
-                    ))}
-                </tbody>
-                </table>
-            </div>
-            )}
+  const counts = {
+    total: applications.length,
+    interview: applications.filter((a) => a.status === "Interview").length,
+    offer: applications.filter((a) => a.status === "Offer").length,
+  };
+
+  return (
+    <div className="min-h-screen bg-paper">
+      <div className="max-w-4xl mx-auto px-6 py-14">
+        <div className="flex items-start justify-between">
+          <h1 className="font-display text-4xl text-ink">Applications</h1>
+          <button onClick={handleLogout} className="text-ink-soft text-sm hover:text-ink transition mt-2">
+            Log out
+          </button>
         </div>
-        </div>
-    );
+
+        {!loading && applications.length > 0 && (
+          <div className="flex gap-8 mt-6 mb-10 pb-8 border-b border-line">
+            <div>
+              <p className="font-display text-3xl text-ink">{counts.total}</p>
+              <p className="text-ink-soft text-sm">Total logged</p>
+            </div>
+            <div>
+              <p className="font-display text-3xl text-dusk">{counts.interview}</p>
+              <p className="text-ink-soft text-sm">In interview</p>
+            </div>
+            <div>
+              <p className="font-display text-3xl text-forest">{counts.offer}</p>
+              <p className="text-ink-soft text-sm">Offers</p>
+            </div>
+            <div className="ml-auto self-end">
+              <Link to="/add" className="inline-block bg-forest hover:bg-forest-dark text-paper text-sm font-medium px-4 py-2.5 rounded transition">
+                Add application
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {loading && <p className="text-ink-soft mt-8">Loading…</p>}
+        {error && <p className="text-clay mt-8">{error}</p>}
+
+        {!loading && applications.length === 0 && (
+          <div className="border border-line rounded-md p-10 text-center mt-8">
+            <p className="text-ink-soft mb-4">Nothing logged yet. Add the first application you sent.</p>
+            <Link to="/add" className="inline-block bg-forest hover:bg-forest-dark text-paper text-sm font-medium px-4 py-2.5 rounded transition">
+              Add application
+            </Link>
+          </div>
+        )}
+
+        {!loading && applications.length > 0 && (
+          <div>
+            {applications.map((app) => (
+              <div key={app.id}
+                className={`flex items-center justify-between border-l-4 ${statusBorder[app.status] || "border-line"} bg-card border-y border-r border-line rounded-r-md px-5 py-4 mb-3`}>
+                <div className="flex-1 min-w-0">
+                  <p className="text-ink font-medium truncate">{app.company}</p>
+                  <p className="text-ink-soft text-sm truncate">{app.role}</p>
+                </div>
+                <div className="hidden sm:block w-28 text-sm text-ink-soft">
+                  {app.applied_date ? new Date(app.applied_date).toLocaleDateString() : "—"}
+                </div>
+                <div className="w-24 text-right">
+                  <StatusTag status={app.status} />
+                </div>
+                <div className="flex gap-4 ml-6">
+                  <button onClick={() => navigate(`/edit/${app.id}`)} className="text-ink-soft text-sm hover:text-forest transition">Edit</button>
+                  <button onClick={() => handleDelete(app.id)} className="text-ink-soft text-sm hover:text-clay transition">Delete</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default Dashboard;
